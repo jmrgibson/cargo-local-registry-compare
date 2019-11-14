@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::hash::{Hasher, Hash};
-use std::path::Path;
 
 use glob::{glob_with, MatchOptions};
 use failure::{format_err, ResultExt};
@@ -23,6 +22,16 @@ struct RegistryPackage {
     yanked: Option<bool>,
 }
 
+impl RegistryPackage {
+    fn sorted_features(&self) -> BTreeMap<String, Vec<String>> {
+        self.features.iter().map(|(k, v)| {
+            let mut v = v.clone();
+            v.sort();
+            (k.clone(), v)
+        }).collect()
+    }
+}
+
 #[derive(Eq, Ord, PartialEq, PartialOrd, Deserialize, Serialize, Debug)]
 struct RegistryDependency {
     name: String,
@@ -40,7 +49,7 @@ impl Hash for RegistryPackage {
         self.name.hash(state);
         self.vers.hash(state);
         self.cksum.hash(state);
-        self.features.hash(state);
+        self.sorted_features().hash(state);
     }
 }
 
@@ -49,7 +58,7 @@ impl PartialEq for RegistryPackage {
         self.cksum == other.cksum
         && self.name == other.name
         && self.vers == other.vers
-        && self.features == other.features
+        && self.sorted_features() == other.sorted_features()
     }
 }
 
@@ -97,11 +106,14 @@ fn main_real() -> Result<()> {
     let only_in_old: HashSet<_> = old.difference(&new).collect();
     let only_in_new: HashSet<_> = new.difference(&old).collect();
     if only_in_old.len() == 0 {
-        println!("Success! {:?} contains all {} packages in {:?}, and {} new packages", new_path, old.len(), old_path, only_in_new.len());
+        eprintln!("Success! {:?} contains all {} packages in {:?}, and {} new packages", new_path, old.len(), old_path, only_in_new.len());
         Ok(())
     } else {
-        println!("Failure! there are {} packages in that are in {:?} but not in {:?} ", only_in_old.len(), old_path, new_path);
-        Err(format_err!("Missing package"))
+        eprintln!("Failure! there are {} packages in that are in {:?} ({} total) but not in {:?} ({} total) ", only_in_old.len(), old_path, old.len(), new_path, new.len());
+        for pkg in only_in_old.iter() {
+            println!("Missing package: {:?}", pkg);
+        }
+        Err(format_err!("Missing package(s)"))
     }
 }
 
@@ -109,7 +121,7 @@ fn main() {
     let retcode = match main_real() {
         Ok(_) => 0,
         Err(e) => {
-            eprintln!("{}", e.as_fail());
+            eprintln!("Exited with error because: {}", e.as_fail());
             1
         },
     };
