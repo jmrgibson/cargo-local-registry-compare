@@ -1,0 +1,13 @@
+[package]
+name = "cargo-local-registry-compare"
+version = "0.1.0"
+authors = ["Joel Gibson <jgibson@tesla.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0", features = ['derive'] }
+serde_json = "1.0"
+glob = "0.3"
+failure = "0.1"
