@@ -109,7 +109,7 @@ fn main_real() -> Result<()> {
         eprintln!("Success! {:?} contains all {} packages in {:?}, and {} new packages", new_path, old.len(), old_path, only_in_new.len());
         Ok(())
     } else {
-        eprintln!("Failure! there are {} packages in that are in {:?} ({} total) but not in {:?} ({} total) ", only_in_old.len(), old_path, old.len(), new_path, new.len());
+        eprintln!("Failure! there are {} packages that are in {:?} ({} total) but not in {:?} ({} total) ", only_in_old.len(), old_path, old.len(), new_path, new.len());
         for pkg in only_in_old.iter() {
             println!("Missing package: {:?}", pkg);
         }

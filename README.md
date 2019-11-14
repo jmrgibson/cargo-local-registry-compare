@@ -25,7 +25,7 @@ Success! "./2019-05-25/index" contains all 567 packages in "./2019-01-01/index",
 
 
 cargo run -- $new_index_dir $old_index_dir > out.txt
-Failure! there are 52 packages in that are in "./2019-01-01" (619 total) but not in "./2019-05-25/index" (567 total)
+Failure! there are 52 packages that are in "./2019-01-01" (619 total) but not in "./2019-05-25/index" (567 total)
 ```
 
 ## Version History
